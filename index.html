@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Formulario de Registros</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            color: #4a5568;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            color: #4a5568;
+            margin: 20px 0 15px;
+            font-size: 1.2rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #4a5568;
+            font-size: 0.9rem;
+        }
+
+        .required {
+            color: #e53e3e;
+            margin-left: 3px;
+        }
+
+        input, select {
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+            background: white;
+            width: 100%;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        input.error {
+            border-color: #e53e3e;
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .btn-secondary {
+            background: #48bb78;
+            margin-top: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: #38a169;
+        }
+
+        .btn-danger {
+            background: #f56565;
+        }
+
+        .btn-danger:hover {
+            background: #e53e3e;
+        }
+
+        .btn-copy {
+            background: #4299e1;
+            margin-left: 10px;
+            padding: 10px 20px;
+            width: auto;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-copy:hover {
+            background: #3182ce;
+        }
+
+        .btn-copy.copied {
+            background: #48bb78;
+        }
+
+        .json-container {
+            margin-top: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .json-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #2d3748;
+            padding: 10px 15px;
+            color: white;
+        }
+
+        .json-header h4 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .json-output {
+            background: #1a202c;
+            color: #cbd5e0;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            max-height: 250px;
+            overflow-y: auto;
+            border-radius: 0 0 10px 10px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .toast-notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #48bb78;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast-notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .filters-section {
+            background: #f7fafc;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-group select {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .filter-group input {
+            flex: 2;
+            min-width: 200px;
+        }
+
+        .lista-container {
+            background: #f7fafc;
+            border-radius: 15px;
+            padding: 20px;
+            max-height: calc(5 * (120px) + 20px); /* Altura para 5 registros + padding */
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-width: thin;
+            scrollbar-color: #667eea #e2e8f0;
+            position: relative;
+            mask-image: linear-gradient(to bottom, black calc(100% - 50px), transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 50px), transparent 100%);
+            transition: max-height 0.3s ease;
+        }
+        
+        /* Estilos para la barra de scroll en Chrome/Safari/Edge */
+        .lista-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .lista-container::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+        
+        .lista-container::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 10px;
+        }
+        
+        .lista-container::-webkit-scrollbar-thumb:hover {
+            background: #5a67d8;
+        }
+
+        /* Indicador de que hay más contenido */
+        .lista-container::after {
+            content: '↓ Desliza para ver más ↓';
+            display: block;
+            text-align: center;
+            color: #667eea;
+            font-size: 12px;
+            font-weight: 500;
+            padding: 10px;
+            background: linear-gradient(to top, rgba(247, 250, 252, 0.95), transparent);
+            position: sticky;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        /* Mostrar el indicador solo cuando hay scroll */
+        .lista-container.show-scroll-indicator::after {
+            opacity: 1;
+        }
+
+        .registro-item {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+            align-items: center;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+            min-height: 120px; /* Altura fija para consistencia */
+        }
+        
+        /* Ajuste para el último registro (efecto de fade) */
+        .registro-item:last-child {
+            margin-bottom: 5px;
+        }
+
+        .registro-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .registro-item input {
+            padding: 8px;
+            font-size: 14px;
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        .registro-item input:focus {
+            background: white;
+        }
+
+        .registro-actions {
+            display: flex;
+            gap: 10px;
+            grid-column: 1 / -1;
+            justify-content: flex-end;
+        }
+
+        .btn-small {
+            padding: 8px 15px;
+            font-size: 14px;
+            width: auto;
+            margin: 0;
+        }
+
+        @media (max-width: 640px) {
+            .form-card {
+                padding: 15px;
+            }
+            
+            .filter-group {
+                flex-direction: column;
+            }
+            
+            .filter-group select,
+            .filter-group input {
+                width: 100%;
+            }
+            
+            .registro-item {
+                grid-template-columns: 1fr;
+            }
+            
+            .registro-actions {
+                flex-direction: column;
+            }
+            
+            .btn-small {
+                width: 100%;
+            }
+
+            .json-header {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .btn-copy {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .lista-container {
+                max-height: calc(3 * (140px) + 20px); /* Altura para 3 registros en móvil */
+                mask-image: linear-gradient(to bottom, black calc(100% - 30px), transparent 100%);
+                -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 30px), transparent 100%);
+            }
+            
+            /* Ajustar el indicador para móviles */
+            .lista-container::after {
+                content: '↓ Toca y desliza para ver más ↓';
+                font-size: 11px;
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sección 1: Datos Personales -->
+        <div class="form-card">
+            <h2>📋 Datos Personales</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Nombre <span class="required">*</span></label>
+                    <input data-filter type="text" id="nombrePersonal" placeholder="Ingrese su nombre">
+                </div>
+                <div class="form-group">
+                    <label>Apellido <span class="required">*</span></label>
+                    <input data-filter type="text" id="apellidoPersonal" placeholder="Ingrese su apellido">
+                </div>
+                <div class="form-group">
+                    <label>Teléfono</label>
+                    <input type="tel" id="telefonoPersonal" placeholder="Ingrese su teléfono">
+                </div>
+                <div class="form-group">
+                    <label>Cédula <span class="required">*</span></label>
+                    <input data-filter type="text" id="cedulaPersonal" placeholder="Ingrese su cédula">
+                </div>
+                <div class="form-group">
+                    <label>Ocupación</label>
+                    <input type="text" id="ocupacion" placeholder="Ingrese su ocupación">
+                </div>
+                <div class="form-group">
+                    <label>Estado Civil <span class="required">*</span></label>
+                    <select data-filter id="edoCivil">
+                        <option value="">Seleccione...</option>
+                        <option value="soltero">Soltero/a</option>
+                        <option value="casado">Casado/a</option>
+                        <option value="divorciado">Divorciado/a</option>
+                        <option value="viudo">Viudo/a</option>
+                        <option value="union_libre">Unión Libre</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección 2: Formulario de Registros -->
+        <div class="form-card">
+            <h2>➕ Agregar Nuevo Registro</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Primer Nombre <span class="required">*</span></label>
+                    <input type="text" id="primerNombre" placeholder="Obligatorio">
+                </div>
+                <div class="form-group">
+                    <label>Segundo Nombre</label>
+                    <input type="text" id="segundoNombre" placeholder="Opcional">
+                </div>
+                <div class="form-group">
+                    <label>Primer Apellido <span class="required">*</span></label>
+                    <input type="text" id="primerApellido" placeholder="Obligatorio">
+                </div>
+                <div class="form-group">
+                    <label>Segundo Apellido</label>
+                    <input type="text" id="segundoApellido" placeholder="Opcional">
+                </div>
+                <div class="form-group">
+                    <label>Teléfono</label>
+                    <input type="tel" id="telefonoRegistro" placeholder="Opcional">
+                </div>
+                <div class="form-group">
+                    <label>Cédula <span class="required">*</span></label>
+                    <input type="text" id="cedulaRegistro" placeholder="Obligatorio">
+                </div>
+            </div>
+            <button class="btn" onclick="agregarRegistro()">➕ Agregar a la Lista</button>
+        </div>
+
+        <!-- Lista con Filtros -->
+        <div class="form-card">
+            <h2>📋 Lista de Registros</h2>
+            
+            <!-- Filtros -->
+            <div class="filters-section">
+                <h3>🔍 Filtrar Registros</h3>
+                <div class="filter-group">
+                    <select id="filtroCampo">
+                        <option value="primerNombre">Primer Nombre</option>
+                        <option value="segundoNombre">Segundo Nombre</option>
+                        <option value="primerApellido">Primer Apellido</option>
+                        <option value="segundoApellido">Segundo Apellido</option>
+                        <option value="telefono">Teléfono</option>
+                        <option value="cedula">Cédula</option>
+                    </select>
+                    <input type="text" id="filtroValor" placeholder="Escriba para filtrar..." oninput="aplicarFiltro()">
+                </div>
+            </div>
+
+            <!-- Lista de Registros -->
+            <div class="lista-container" id="listaRegistros">
+                <!-- Los registros se insertarán aquí dinámicamente -->
+            </div>
+
+            <!-- Botón para generar JSON -->
+            <button class="btn btn-secondary" onclick="generarYMostrarJSON()">📄 Generar y Mostrar Datos</button>
+
+            <!-- Área de visualización JSON con botón copiar -->
+            <div class="json-container" id="jsonContainer" style="display: none;">
+                <div class="json-header">
+                    <h4>📋 Datos Generado</h4>
+                    <button class="btn-copy" onclick="copiarJSON()" id="btnCopiar">
+                        <span>📋</span> Copiar Datos
+                    </button>
+                </div>
+                <div class="json-output" id="jsonOutput"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Array para almacenar los registros
+        let registros = [];
+        let filtroActual = { campo: 'primerNombre', valor: '' };
+        let jsonActual = '';
+        const COOKIE_PREFIX = 'form_data_';
+        const COOKIE_EXPIRATION_HOURS = 24;
+        const MAX_COOKIE_SIZE = 3500; // 3.5KB para dejar margen de seguridad
+
+
+        // Función para guardar JSON en cookies (con división automática)
+        function guardarJSONenCookies(jsonData) {
+            try {
+                // Limpiar cookies anteriores
+                limpiarTodasLasCookies();
+                
+                const fechaExpiracion = new Date();
+                fechaExpiracion.setTime(fechaExpiracion.getTime() + (COOKIE_EXPIRATION_HOURS * 60 * 60 * 1000));
+                
+                // Verificar tamaño total
+                const tamañoTotalKB = new Blob([jsonData]).size / 1024;
+                console.log(`Tamaño total del JSON: ${tamañoTotalKB.toFixed(2)}KB`);
+                
+                if (new Blob([jsonData]).size <= MAX_COOKIE_SIZE) {
+                    // JSON pequeño - guardar en una sola cookie
+                    document.cookie = `${COOKIE_PREFIX}main=${encodeURIComponent(jsonData)}; expires=${fechaExpiracion.toUTCString()}; path=/; SameSite=Strict`;
+                    document.cookie = `${COOKIE_PREFIX}count=1; expires=${fechaExpiracion.toUTCString()}; path=/; SameSite=Strict`;
+                    console.log('JSON guardado en 1 cookie');
+                    return { exito: true, totalCookies: 1 };
+                } else {
+                    // JSON grande - dividir en múltiples cookies
+                    const jsonString = jsonData;
+                    const partes = [];
+                    
+                    // Dividir el string en partes más pequeñas
+                    for (let i = 0; i < jsonString.length; i += MAX_COOKIE_SIZE) {
+                        partes.push(jsonString.substring(i, i + MAX_COOKIE_SIZE));
+                    }
+                    
+                    // Guardar cada parte en una cookie
+                    partes.forEach((parte, index) => {
+                        document.cookie = `${COOKIE_PREFIX}part_${index}=${encodeURIComponent(parte)}; expires=${fechaExpiracion.toUTCString()}; path=/; SameSite=Strict`;
+                    });
+                    
+                    // Guardar metadata
+                    document.cookie = `${COOKIE_PREFIX}count=${partes.length}; expires=${fechaExpiracion.toUTCString()}; path=/; SameSite=Strict`;
+                    document.cookie = `${COOKIE_PREFIX}metadata=${encodeURIComponent(JSON.stringify({
+                        totalPartes: partes.length,
+                        fechaGeneracion: new Date().toISOString()
+                    }))}; expires=${fechaExpiracion.toUTCString()}; path=/; SameSite=Strict`;
+                    
+                    console.log(`JSON dividido en ${partes.length} cookies`);
+                    return { exito: true, totalCookies: partes.length };
+                }
+            } catch (error) {
+                console.error('Error al guardar en cookies:', error);
+                return { exito: false, error: error.message };
+            }
+        }
+
+        // Función para recuperar JSON de las cookies
+        function recuperarJSONdeCookies() {
+            try {
+                // Obtener todas las cookies
+                const cookies = document.cookie.split(';').map(cookie => cookie.trim());
+                
+                // Buscar el contador de partes
+                const countCookie = cookies.find(cookie => cookie.startsWith(COOKIE_PREFIX + 'count='));
+                if (!countCookie) {
+                    console.log('No hay datos guardados en cookies');
+                    return null;
+                }
+                
+                const totalPartes = parseInt(countCookie.split('=')[1]);
+                
+                if (totalPartes === 1) {
+                    // Una sola cookie
+                    const mainCookie = cookies.find(cookie => cookie.startsWith(COOKIE_PREFIX + 'main='));
+                    if (mainCookie) {
+                        const jsonData = decodeURIComponent(mainCookie.split('=')[1]);
+                        // Verificar que sea JSON válido
+                        JSON.parse(jsonData);
+                        return jsonData;
+                    }
+                } else {
+                    // Múltiples cookies
+                    let jsonCompleto = '';
+                    
+                    for (let i = 0; i < totalPartes; i++) {
+                        const parteCookie = cookies.find(cookie => cookie.startsWith(COOKIE_PREFIX + `part_${i}=`));
+                        if (parteCookie) {
+                            jsonCompleto += decodeURIComponent(parteCookie.split('=')[1]);
+                        } else {
+                            console.error(`Falta la parte ${i} del JSON`);
+                            return null;
+                        }
+                    }
+                    
+                    // Verificar que sea JSON válido
+                    JSON.parse(jsonCompleto);
+                    return jsonCompleto;
+                }
+                
+                return null;
+            } catch (error) {
+                console.error('Error al recuperar JSON de cookies:', error);
+                return null;
+            }
+        }
+
+        // Función para limpiar todas las cookies del prefijo
+        function limpiarTodasLasCookies() {
+            const cookies = document.cookie.split(';');
+            
+            cookies.forEach(cookie => {
+                const nombreCookie = cookie.split('=')[0].trim();
+                if (nombreCookie.startsWith(COOKIE_PREFIX)) {
+                    document.cookie = `${nombreCookie}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Strict`;
+                }
+            });
+            
+            console.log('Cookies anteriores limpiadas');
+        }
+
+        // Función para obtener información de las cookies guardadas
+        function obtenerInfoCookies() {
+            try {
+                const cookies = document.cookie.split(';').map(cookie => cookie.trim());
+                const countCookie = cookies.find(cookie => cookie.startsWith(COOKIE_PREFIX + 'count='));
+                
+                if (!countCookie) {
+                    return null;
+                }
+                
+                const totalPartes = parseInt(countCookie.split('=')[1]);
+                
+                // Buscar metadata si existe
+                const metadataCookie = cookies.find(cookie => cookie.startsWith(COOKIE_PREFIX + 'metadata='));
+                let metadata = null;
+                
+                if (metadataCookie) {
+                    try {
+                        metadata = JSON.parse(decodeURIComponent(metadataCookie.split('=')[1]));
+                    } catch (e) {
+                        console.error('Error al parsear metadata');
+                    }
+                }
+                
+                // Calcular tamaño aproximado
+                let tamañoTotal = 0;
+                if (totalPartes === 1) {
+                    const mainCookie = cookies.find(cookie => cookie.startsWith(COOKIE_PREFIX + 'main='));
+                    if (mainCookie) {
+                        tamañoTotal = new Blob([decodeURIComponent(mainCookie.split('=')[1])]).size;
+                    }
+                } else {
+                    for (let i = 0; i < totalPartes; i++) {
+                        const parteCookie = cookies.find(cookie => cookie.startsWith(COOKIE_PREFIX + `part_${i}=`));
+                        if (parteCookie) {
+                            tamañoTotal += new Blob([decodeURIComponent(parteCookie.split('=')[1])]).size;
+                        }
+                    }
+                }
+                
+                return {
+                    totalPartes,
+                    tamañoKB: (tamañoTotal / 1024).toFixed(2),
+                    metadata
+                };
+            } catch (error) {
+                console.error('Error al obtener info de cookies:', error);
+                return null;
+            }
+        }
+
+        // Función para mostrar información de cookies en el header
+        function mostrarInfoCookiesEnHeader() {
+            const info = obtenerInfoCookies();
+            return '📦 Esta información expira en: 24h';
+            /*if (info) {
+                let mensaje = `📦 ${info.totalPartes} cookie${info.totalPartes > 1 ? 's' : ''}`;
+                if (info.totalPartes > 1) {
+                    mensaje += ` (dividido)`;
+                }
+                mensaje += ` | Tamaño: ${info.tamañoKB}KB | Expira: 24h`;
+                return mensaje;
+            }
+            return null;*/
+        }
+
+        // Función para actualizar header con info de cookies
+        function actualizarHeaderConInfoCookies() {
+            const jsonHeader = document.querySelector('.json-header h4');
+            if (jsonHeader) {
+                const infoCookies = mostrarInfoCookiesEnHeader();
+                if (infoCookies) {
+                    jsonHeader.innerHTML = `📋 Datos Generado <small style="font-size: 11px; color: #a0aec0; margin-left: 10px;">${infoCookies}</small>`;
+                } else {
+                    jsonHeader.innerHTML = '📋 Datos Generado';
+                }
+            }
+        }
+
+        // Función para cargar JSON guardado al iniciar la página
+        function cargarJSONGuardado() {
+            const jsonGuardado = recuperarJSONdeCookies();
+            
+            if (jsonGuardado) {
+                try {
+                    // Parsear el JSON para verificar que sea válido
+                    const datosParseados = JSON.parse(jsonGuardado);
+                    
+                    // Restaurar los registros si existen
+                    if (datosParseados.registros && Array.isArray(datosParseados.registros)) {
+                        registros = datosParseados.registros;
+                        actualizarLista();
+                    }
+                    
+                    // Restaurar datos personales si existen
+                    if (datosParseados.datosPersonales) {
+                        document.getElementById('nombrePersonal').value = datosParseados.datosPersonales.nombre || '';
+                        document.getElementById('apellidoPersonal').value = datosParseados.datosPersonales.apellido || '';
+                        document.getElementById('telefonoPersonal').value = datosParseados.datosPersonales.telefono || '';
+                        document.getElementById('cedulaPersonal').value = datosParseados.datosPersonales.cedula || '';
+                        document.getElementById('ocupacion').value = datosParseados.datosPersonales.ocupacion || '';
+                        document.getElementById('edoCivil').value = datosParseados.datosPersonales.edoCivil || '';
+                    }
+                    
+                    // Mostrar el JSON en la interfaz
+                    jsonActual = jsonGuardado;
+                    const jsonOutput = document.getElementById('jsonOutput');
+                    jsonOutput.textContent = jsonActual;
+                    
+                    const jsonContainer = document.getElementById('jsonContainer');
+                    jsonContainer.style.display = 'block';
+                    
+                    // Actualizar header con info de cookies
+                    actualizarHeaderConInfoCookies();
+                    
+                    // Mostrar mensaje de restauración
+                    mostrarToast('🔄 Datos restaurados');
+                    
+                    console.log('Datos cargados exitosamente desde cookies');
+                    
+                    // Mostrar info de cookies en consola
+                    const infoCookies = obtenerInfoCookies();
+                    if (infoCookies) {
+                        console.log('Información de cookies:', infoCookies);
+                    }
+                    
+                } catch (error) {
+                    console.error('Error al cargar JSON guardado:', error);
+                    mostrarToast('❌ Error al restaurar datos');
+                    limpiarTodasLasCookies(); // Limpiar cookies corruptas
+                }
+            } else {
+                console.log('No hay datos guardados en cookies');
+            }
+        }
+
+        // Función para limpiar cookies manualmente (opcional)
+        function limpiarCookies() {
+            if (confirm('¿Estás seguro de limpiar todos los datos guardados?')) {
+                limpiarTodasLasCookies();
+                
+                // Limpiar la interfaz
+                document.getElementById('jsonContainer').style.display = 'none';
+                document.getElementById('jsonOutput').textContent = '';
+                
+                mostrarToast('🧹 Cookies limpiadas');
+            }
+        }
+
+
+
+
+
+        // Función para mostrar toast notification
+        function mostrarToast(mensaje) {
+            const toast = document.getElementById('toast');
+            toast.textContent = mensaje || '¡Copiado al portapapeles!';
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        // Función para copiar JSON al portapapeles
+        async function copiarJSON() {
+            const jsonOutput = document.getElementById('jsonOutput');
+            const btnCopiar = document.getElementById('btnCopiar');
+            const jsonTexto = jsonOutput.textContent;
+
+            if (!jsonTexto) {
+                mostrarToast('No hay datos para copiar');
+                return;
+            }
+
+            try {
+                await navigator.clipboard.writeText(jsonTexto);
+                
+                // Feedback visual
+                btnCopiar.classList.add('copied');
+                btnCopiar.innerHTML = '<span>✅</span> ¡Copiado!';
+                mostrarToast('¡Datos copiado al portapapeles!');
+                
+                setTimeout(() => {
+                    btnCopiar.classList.remove('copied');
+                    btnCopiar.innerHTML = '<span>📋</span> Copiar Datos';
+                }, 2000);
+            } catch (err) {
+                console.error('Error al copiar:', err);
+                
+                // Fallback para navegadores antiguos
+                const textarea = document.createElement('textarea');
+                textarea.value = jsonTexto;
+                document.body.appendChild(textarea);
+                textarea.select();
+                
+                try {
+                    document.execCommand('copy');
+                    btnCopiar.classList.add('copied');
+                    btnCopiar.innerHTML = '<span>✅</span> ¡Copiado!';
+                    mostrarToast('¡Datos copiado al portapapeles!');
+                    
+                    setTimeout(() => {
+                        btnCopiar.classList.remove('copied');
+                        btnCopiar.innerHTML = '<span>📋</span> Copiar Datos';
+                    }, 2000);
+                } catch (e) {
+                    mostrarToast('Error al copiar. Selecciona manualmente.');
+                }
+                
+                document.body.removeChild(textarea);
+            }
+        }
+
+        // Función para generar y mostrar JSON
+        function generarYMostrarJSON() {
+            const datosPersonales = {
+                nombre: document.getElementById('nombrePersonal').value.trim(),
+                apellido: document.getElementById('apellidoPersonal').value.trim(),
+                telefono: document.getElementById('telefonoPersonal').value.trim(),
+                cedula: document.getElementById('cedulaPersonal').value.trim(),
+                ocupacion: document.getElementById('ocupacion').value.trim(),
+                edoCivil: document.getElementById('edoCivil').value
+            };
+
+            // Verificar que se hayan ingresado los datos personales
+            let camposVacios = [];
+
+            document.querySelectorAll('[data-filter]').forEach(element => {
+                if (element.value.trim() === '') {
+                    // Guardar referencia o identificador del campo vacío
+                    const nombreCampo = element.name || element.id || 'campo requerido';
+                    camposVacios.push(nombreCampo);
+                    
+                    // Opcional: resaltar visualmente el campo vacío
+                    element.style.border = '2px solid red';
+                } else {
+                    // Restaurar estilo si estaba marcado como error
+                    element.style.border = '';
+                }
+            });
+
+            if (camposVacios.length > 0) {
+                alert('Por favor, complete los siguientes datos personales marcados con (*)');
+                return; // Detener el envío del formulario
+            }
+
+            if (registros.length <= 0) {
+                alert('Debes ingresar Minimo una persona en la lista');
+                return;
+            }
+
+            const jsonCompleto = {
+                datosPersonales: datosPersonales,
+                registros: registros,
+                fechaGeneracion: new Date().toISOString(),
+                version: '1.0'
+            };
+
+            jsonActual = JSON.stringify(jsonCompleto, null, 2);
+            
+            // Guardar en cookies con división automática
+            const resultado = guardarJSONenCookies(jsonActual);
+            
+            if (resultado.exito) {
+                const mensaje = '✅ Información guardada para las próximas 24 Horas';
+                mostrarToast(mensaje);
+                
+                console.log(`JSON guardado exitosamente:
+                    - Total cookies: ${resultado.totalCookies}
+                    - Tamaño total: ${new Blob([jsonActual]).size / 1024}KB
+                    - Expiración: 24 horas
+                `);
+            } else {
+                mostrarToast('❌ Error al guardar la información');
+            }
+            
+            const jsonOutput = document.getElementById('jsonOutput');
+            jsonOutput.textContent = jsonActual;
+            
+            const jsonContainer = document.getElementById('jsonContainer');
+            jsonContainer.style.display = 'block';
+            
+            // Resetear el botón de copiar
+            const btnCopiar = document.getElementById('btnCopiar');
+            btnCopiar.classList.remove('copied');
+            btnCopiar.innerHTML = '<span>📋</span> Copiar Datos';
+            
+            // Actualizar header con info de cookies
+            actualizarHeaderConInfoCookies();
+        }
+
+
+
+
+        // Función para validar campos obligatorios
+        function validarCamposObligatorios() {
+            const primerNombre = document.getElementById('primerNombre').value.trim();
+            const primerApellido = document.getElementById('primerApellido').value.trim();
+            const cedula = document.getElementById('cedulaRegistro').value.trim();
+
+            // Resetear errores
+            document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
+
+            let isValid = true;
+
+            if (!primerNombre) {
+                document.getElementById('primerNombre').classList.add('error');
+                isValid = false;
+            }
+            if (!primerApellido) {
+                document.getElementById('primerApellido').classList.add('error');
+                isValid = false;
+            }
+            if (!cedula) {
+                document.getElementById('cedulaRegistro').classList.add('error');
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        // Función para agregar un nuevo registro
+        function agregarRegistro() {
+            if (!validarCamposObligatorios()) {
+                alert('Por favor, complete todos los campos obligatorios (*)');
+                return;
+            }
+
+            const nuevoRegistro = {
+                primerNombre: document.getElementById('primerNombre').value.trim(),
+                segundoNombre: document.getElementById('segundoNombre').value.trim(),
+                primerApellido: document.getElementById('primerApellido').value.trim(),
+                segundoApellido: document.getElementById('segundoApellido').value.trim(),
+                telefono: document.getElementById('telefonoRegistro').value.trim(),
+                cedula: document.getElementById('cedulaRegistro').value.trim()
+            };
+
+            // Agregar al inicio de la lista
+            registros.unshift(nuevoRegistro);
+
+            // Limpiar el formulario
+            document.getElementById('primerNombre').value = '';
+            document.getElementById('segundoNombre').value = '';
+            document.getElementById('primerApellido').value = '';
+            document.getElementById('segundoApellido').value = '';
+            document.getElementById('telefonoRegistro').value = '';
+            document.getElementById('cedulaRegistro').value = '';
+
+            // Resetear filtros
+            document.getElementById('filtroValor').value = '';
+            filtroActual.valor = '';
+            
+            // Actualizar la lista
+            actualizarLista();
+
+            // Ocultar JSON si estaba visible
+            document.getElementById('jsonContainer').style.display = 'none';
+        }
+
+        // Función para actualizar un registro específico
+        function actualizarRegistro(index, campo, valor) {
+            registros[index][campo] = valor;
+            aplicarFiltro(); // Reaplicar filtro para mantener la vista actualizada
+        }
+
+        // Función para eliminar un registro
+        function eliminarRegistro(index) {
+            if (confirm('¿Está seguro de eliminar este registro?')) {
+                registros.splice(index, 1);
+                aplicarFiltro();
+            }
+        }
+
+        // Función para aplicar filtro
+        function aplicarFiltro() {
+            filtroActual.campo = document.getElementById('filtroCampo').value;
+            filtroActual.valor = document.getElementById('filtroValor').value.toLowerCase();
+
+            actualizarLista();
+        }
+
+
+        // Función para verificar si hay scroll y mostrar indicador
+        function verificarScrollLista() {
+            const listaContainer = document.getElementById('listaRegistros');
+            
+            if (listaContainer) {
+                // Verificar si el contenido es más grande que el contenedor
+                const tieneScroll = listaContainer.scrollHeight > listaContainer.clientHeight;
+                
+                if (tieneScroll) {
+                    listaContainer.classList.add('show-scroll-indicator');
+                } else {
+                    listaContainer.classList.remove('show-scroll-indicator');
+                }
+            }
+        }
+
+        // Función para actualizar la visualización de la lista
+        function actualizarLista() {
+            const listaContainer = document.getElementById('listaRegistros');
+            
+            // Filtrar registros
+            let registrosFiltrados = registros;
+            if (filtroActual.valor) {
+                registrosFiltrados = registros.filter(registro => {
+                    const valorCampo = (registro[filtroActual.campo] || '').toLowerCase();
+                    return valorCampo.includes(filtroActual.valor);
+                });
+            }
+
+            // Generar HTML
+            if (registrosFiltrados.length === 0) {
+                listaContainer.innerHTML = '<p style="text-align: center; color: #718096;">No hay registros para mostrar</p>';
+                return;
+            }
+
+            let html = '';
+            registrosFiltrados.forEach((registro, index) => {
+                // Encontrar el índice original en el array completo
+                const originalIndex = registros.findIndex(r => 
+                    r.cedula === registro.cedula && 
+                    r.primerNombre === registro.primerNombre && 
+                    r.primerApellido === registro.primerApellido
+                );
+
+                html += `
+                    <div class="registro-item">
+                        <input type="text" value="${registro.primerNombre || ''}" 
+                               placeholder="Primer Nombre"
+                               onchange="actualizarRegistro(${originalIndex}, 'primerNombre', this.value)">
+                        <input type="text" value="${registro.segundoNombre || ''}" 
+                               placeholder="Segundo Nombre"
+                               onchange="actualizarRegistro(${originalIndex}, 'segundoNombre', this.value)">
+                        <input type="text" value="${registro.primerApellido || ''}" 
+                               placeholder="Primer Apellido"
+                               onchange="actualizarRegistro(${originalIndex}, 'primerApellido', this.value)">
+                        <input type="text" value="${registro.segundoApellido || ''}" 
+                               placeholder="Segundo Apellido"
+                               onchange="actualizarRegistro(${originalIndex}, 'segundoApellido', this.value)">
+                        <input type="text" value="${registro.telefono || ''}" 
+                               placeholder="Teléfono"
+                               onchange="actualizarRegistro(${originalIndex}, 'telefono', this.value)">
+                        <input type="text" value="${registro.cedula || ''}" 
+                               placeholder="Cédula"
+                               onchange="actualizarRegistro(${originalIndex}, 'cedula', this.value)">
+                        <div class="registro-actions">
+                            <button class="btn-small btn-danger" onclick="eliminarRegistro(${originalIndex})">🗑️ Eliminar</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Al final de la función, después de asignar listaContainer.innerHTML
+            listaContainer.innerHTML = html;
+            
+            // Verificar scroll después de actualizar
+            setTimeout(verificarScrollLista, 100); // Pequeño delay para asegurar que el DOM se actualizó
+        }
+
+        // Función para generar JSON
+        function generarJSON() {
+
+            const datosPersonales = {
+                nombre: document.getElementById('nombrePersonal').value.trim(),
+                apellido: document.getElementById('apellidoPersonal').value.trim(),
+                telefono: document.getElementById('telefonoPersonal').value.trim(),
+                cedula: document.getElementById('cedulaPersonal').value.trim(),
+                ocupacion: document.getElementById('ocupacion').value.trim(),
+                edoCivil: document.getElementById('edoCivil').value
+            };
+
+            const jsonCompleto = {
+                datosPersonales: datosPersonales,
+                registros: registros
+            };
+
+            const jsonOutput = document.getElementById('jsonOutput');
+            jsonOutput.style.display = 'block';
+            jsonOutput.textContent = JSON.stringify(jsonCompleto, null, 2);
+        }
+
+        // Inicializar la lista
+        actualizarLista();
+
+        // Cargar datos guardados al iniciar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            cargarJSONGuardado();
+            
+            // Actualizar información de cookies cada minuto (opcional)
+            setInterval(actualizarHeaderConInfoCookies, 60000);
+        });
+    </script>
+
+    <!-- Toast notification -->
+    <div class="toast-notification" id="toast">¡Copiado al portapapeles!</div>
+</body>
+</html>
